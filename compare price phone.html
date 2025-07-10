@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Site Shopping Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        #searchInput {
+            flex: 1;
+            padding: 18px 25px;
+            border: 3px solid #e0e6ff;
+            border-radius: 50px;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .search-btn {
+            padding: 18px 35px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        .options {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-group:hover {
+            background: #f0f4ff;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #667eea;
+        }
+
+        .checkbox-group label {
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .site-card {
+            background: linear-gradient(135deg, #f8f9ff, #e8f0fe);
+            border: 2px solid #e0e6ff;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .site-card.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .site-logo {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .site-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .site-description {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .quick-btn {
+            padding: 12px 20px;
+            border: 2px solid #667eea;
+            background: transparent;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .recent-searches {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .recent-searches h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .recent-item {
+            display: inline-block;
+            background: #f0f4ff;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e0e6ff;
+        }
+
+        .recent-item:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .mobile-nav-container {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .mobile-nav-container h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .mobile-nav-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .mobile-nav-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .mobile-nav-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .mobile-nav-progress {
+            background: #e0e6ff;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        #progressBar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .search-input-group {
+                flex-direction: column;
+            }
+            
+            .search-btn {
+                margin-bottom: 10px;
+            }
+            
+            .options {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .sites-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛍️ Multi-Site Shopping Search</h1>
+        <p class="subtitle">Search across multiple shopping websites instantly</p>
+        
+        <div class="search-section">
+            <div class="search-input-group">
+                <input type="text" id="searchInput" placeholder="Enter product name (e.g., iPhone 15, Nike shoes, laptop...)" />
+                <button class="search-btn" onclick="searchAllSites()">🔍 Search All Selected</button>
+                <button class="search-btn" onclick="closeAllTabs()" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">❌ Close All Tabs</button>
+            </div>
+            
+            <div class="options">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="newTab" checked>
+                    <label for="newTab">Open in new tabs</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="delayOpen">
+                    <label for="delayOpen">Delay between tabs (2s)</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="mobileMode">
+                    <label for="mobileMode">Mobile mode (one at a time)</label>
+                </div>
+            </div>
+
+            <div class="sites-grid">
+                <div class="site-card selected" data-site="amazon">
+                    <span class="site-logo">📦</span>
+                    <div class="site-name">Amazon</div>
+                    <div class="site-description">Everything store</div>
+                </div>
+                <div class="site-card selected" data-site="ebay">
+                    <span class="site-logo">🏷️</span>
+                    <div class="site-name">eBay</div>
+                    <div class="site-description">Auctions & deals</div>
+                </div>
+                <div class="site-card selected" data-site="walmart">
+                    <span class="site-logo">🛒</span>
+                    <div class="site-name">Walmart</div>
+                    <div class="site-description">Everyday low prices</div>
+                </div>
+                <div class="site-card selected" data-site="costco">
+                    <span class="site-logo">🏪</span>
+                    <div class="site-name">Costco</div>
+                    <div class="site-description">Bulk & wholesale</div>
+                </div>
+                <div class="site-card selected" data-site="shopee">
+                    <span class="site-logo">🛍️</span>
+                    <div class="site-name">Shopee</div>
+                    <div class="site-description">Southeast Asia marketplace</div>
+                </div>
+                <div class="site-card selected" data-site="taobao">
+                    <span class="site-logo">🏮</span>
+                    <div class="site-name">Taobao</div>
+                    <div class="site-description">China's largest marketplace</div>
+                </div>
+                <div class="site-card selected" data-site="momoshop">
+                    <span class="site-logo">🍑</span>
+                    <div class="site-name">MomoShop</div>
+                    <div class="site-description">Taiwan shopping</div>
+                </div>
+                <div class="site-card selected" data-site="pchome">
+                    <span class="site-logo">🏠</span>
+                    <div class="site-name">PChome</div>
+                    <div class="site-description">Taiwan online mall</div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="selectAllSites()">Select All</button>
+                <button class="quick-btn" onclick="deselectAllSites()">Deselect All</button>
+                <button class="quick-btn" onclick="selectPopularSites()">Popular Sites Only</button>
+            </div>
+        </div>
+
+        <div class="recent-searches">
+            <h3>Recent Searches</h3>
+            <div id="recentSearches">
+                <span class="recent-item" onclick="quickSearch('iPhone 15')">iPhone 15</span>
+                <span class="recent-item" onclick="quickSearch('無線耳機')">無線耳機</span>
+                <span class="recent-item" onclick="quickSearch('筆記型電腦')">筆記型電腦</span>
+                <span class="recent-item" onclick="quickSearch('gaming chair')">gaming chair</span>
+            </div>
+        </div>
+
+        <div id="status"></div>
+
+        <div id="mobileNavigation" style="display: none;">
+            <div class="mobile-nav-container">
+                <h3>Browse Shopping Sites</h3>
+                <div class="mobile-nav-info">
+                    <span id="currentSiteInfo"></span>
+                </div>
+                <div class="mobile-nav-buttons">
+                    <button class="mobile-nav-btn" onclick="goToPreviousSite()">← Previous</button>
+                    <button class="mobile-nav-btn" onclick="openCurrentSite()">Open Site</button>
+                    <button class="mobile-nav-btn" onclick="goToNextSite()">Next →</button>
+                </div>
+                <div class="mobile-nav-progress">
+                    <div id="progressBar"></div>
+                </div>
+                <button class="mobile-nav-btn" onclick="exitMobileMode()" style="margin-top: 15px; background: #ff6b6b;">Exit Mobile Mode</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const searchSites = {
+            amazon: 'https://www.amazon.com/s?k=',
+            ebay: 'https://www.ebay.com/sch/i.html?_nkw=',
+            walmart: 'https://www.walmart.com/search?q=',
+            costco: 'https://www.costco.com/CatalogSearch?keyword=',
+            shopee: 'https://shopee.tw/search?keyword=',
+            taobao: 'https://s.taobao.com/search?q=',
+            momoshop: 'https://www.momoshop.com.tw/search/searchShop.jsp?keyword=',
+            pchome: 'https://ecshweb.pchome.com.tw/search/v3.3/?q='
+        };
+
+        let openedTabs = [];
+        let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+        let mobileSearchData = {
+            searchTerm: '',
+            sites: [],
+            currentIndex: 0
+        };
+
+        // Auto-detect mobile devices
+        function isMobileDevice() {
+            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Auto-enable mobile mode on mobile devices
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isMobileDevice()) {
+                document.getElementById('mobileMode').checked = true;
+                document.getElementById('newTab').checked = false;
+            }
+            updateRecentSearchesDisplay();
+        });
+
+        // Site selection functionality
+        document.querySelectorAll('.site-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('selected');
+            });
+        });
+
+        function selectAllSites() {
+            document.querySelectorAll('.site-card').forEach(card => {
+                card.classList.add('selected');
+            });
+        }
+
+        function deselectAllSites() {
+            document.querySelectorAll('.site-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+        }
+
+        function selectPopularSites() {
+            deselectAllSites();
+            ['amazon', 'ebay', 'shopee', 'taobao'].forEach(site => {
+                document.querySelector(`[data-site="${site}"]`).classList.add('selected');
+            });
+        }
+
+        function searchAllSites() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (!searchTerm) {
+                showStatus('Please enter a search term', 'error');
+                return;
+            }
+
+            const selectedSites = Array.from(document.querySelectorAll('.site-card.selected'))
+                .map(card => card.dataset.site);
+
+            if (selectedSites.length === 0) {
+                showStatus('Please select at least one shopping site', 'error');
+                return;
+            }
+
+            const newTab = document.getElementById('newTab').checked;
+            const delayOpen = document.getElementById('delayOpen').checked;
+            const mobileMode = document.getElementById('mobileMode').checked;
+            const encodedSearch = encodeURIComponent(searchTerm);
+
+            // Check if search term contains Chinese characters
+            const hasChinese = /[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/.test(searchTerm);
+            const chineseIncompatibleSites = ['costco', 'walmart'];
+            
+            let sitesToSearch = selectedSites;
+            let skippedSites = [];
+
+            if (hasChinese) {
+                skippedSites = selectedSites.filter(site => chineseIncompatibleSites.includes(site));
+                sitesToSearch = selectedSites.filter(site => !chineseIncompatibleSites.includes(site));
+                
+                if (skippedSites.length > 0) {
+                    showStatus(`Skipped ${skippedSites.join(', ')} - these sites don't support Chinese search terms`, 'error');
+                }
+            }
+
+            if (sitesToSearch.length === 0) {
+                showStatus('No compatible sites selected for this search term', 'error');
+                return;
+            }
+
+            // Add to recent searches
+            addToRecentSearches(searchTerm);
+
+            // Mobile mode - show navigation interface
+            if (mobileMode) {
+                mobileSearchData = {
+                    searchTerm: searchTerm,
+                    encodedSearch: encodedSearch,
+                    sites: sitesToSearch,
+                    currentIndex: 0
+                };
+                showMobileNavigation();
+                return;
+            }
+
+            // Desktop mode - open all sites
+            openedTabs = []; // Clear previous tabs array
+            sitesToSearch.forEach((site, index) => {
+                const url = searchSites[site] + encodedSearch;
+                
+                if (delayOpen && index > 0) {
+                    setTimeout(() => {
+                        const tab = window.open(url, newTab ? '_blank' : '_self');
+                        if (newTab && tab) openedTabs.push(tab);
+                    }, index * 2000);
+                } else {
+                    const tab = window.open(url, newTab ? '_blank' : '_self');
+                    if (newTab && tab) openedTabs.push(tab);
+                }
+            });
+
+            const statusMessage = skippedSites.length > 0 
+                ? `Opening ${sitesToSearch.length} compatible sites for "${searchTerm}" (skipped ${skippedSites.length} sites)`
+                : `Opening ${sitesToSearch.length} shopping sites for "${searchTerm}"`;
+            
+            showStatus(statusMessage, 'success');
+        }
+
+        function showMobileNavigation() {
+            document.querySelector('.search-section').style.display = 'none';
+            document.querySelector('.recent-searches').style.display = 'none';
+            document.getElementById('mobileNavigation').style.display = 'block';
+            updateMobileNavigation();
+        }
+
+        function updateMobileNavigation() {
+            const currentSite = mobileSearchData.sites[mobileSearchData.currentIndex];
+            const siteNames = {
+                amazon: 'Amazon',
+                ebay: 'eBay',
+                walmart: 'Walmart',
+                costco: 'Costco',
+                shopee: 'Shopee',
+                taobao: 'Taobao',
+                momoshop: 'MomoShop',
+                pchome: 'PChome'
+            };
+
+            document.getElementById('currentSiteInfo').textContent = 
+                `${siteNames[currentSite]} (${mobileSearchData.currentIndex + 1} of ${mobileSearchData.sites.length})`;
+            
+            const progress = ((mobileSearchData.currentIndex + 1) / mobileSearchData.sites.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function goToPreviousSite() {
+            if (mobileSearchData.currentIndex > 0) {
+                mobileSearchData.currentIndex--;
+                updateMobileNavigation();
+            }
+        }
+
+        function goToNextSite() {
+            if (mobileSearchData.currentIndex < mobileSearchData.sites.length - 1) {
+                mobileSearchData.currentIndex++;
+                updateMobileNavigation();
+            }
+        }
+
+        function openCurrentSite() {
+            const currentSite = mobileSearchData.sites[mobileSearchData.currentIndex];
+            const url = searchSites[currentSite] + mobileSearchData.encodedSearch;
+            window.open(url, '_blank');
+        }
+
+        function exitMobileMode() {
+            document.querySelector('.search-section').style.display = 'block';
+            document.querySelector('.recent-searches').style.display = 'block';
+            document.getElementById('mobileNavigation').style.display = 'none';
+        }
+
+        function closeAllTabs() {
+            let closedCount = 0;
+            openedTabs.forEach(tab => {
+                if (tab && !tab.closed) {
+                    tab.close();
+                    closedCount++;
+                }
+            });
+            
+            if (closedCount > 0) {
+                openedTabs = [];
+                showStatus(`Closed ${closedCount} shopping tabs`, 'success');
+            } else {
+                showStatus('No tabs to close or tabs were already closed', 'error');
+            }
+        }
+
+        function quickSearch(term) {
+            document.getElementById('searchInput').value = term;
+            searchAllSites();
+        }
+
+        function addToRecentSearches(term) {
+            recentSearches = recentSearches.filter(search => search !== term);
+            recentSearches.unshift(term);
+            recentSearches = recentSearches.slice(0, 8);
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+            updateRecentSearchesDisplay();
+        }
+
+        function updateRecentSearchesDisplay() {
+            const container = document.getElementById('recentSearches');
+            container.innerHTML = recentSearches.map(search => 
+                `<span class="recent-item" onclick="quickSearch('${search}')">${search}</span>`
+            ).join('');
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            setTimeout(() => {
+                statusDiv.textContent = '';
+                statusDiv.className = '';
+            }, 4000);
+        }
+
+        // Enter key functionality
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchAllSites();
+            }
+        });
+
+        // Initialize recent searches display
+        // Remove the duplicate DOMContentLoaded listener since we moved it above
+        // updateRecentSearchesDisplay();
+    </script>
+</body>
+</html>
